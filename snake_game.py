@@ -27,7 +27,11 @@ CENTER_POSITION = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 class GameObject:
     """Базовый класс для игровых объектов (змейка и яблоко)."""
 
-    def __init__(self, position: Tuple[int, int] = None, body_color: Tuple[int, int] = None):
+    def __init__(
+        self,
+        position: Tuple[int, int] | None = None,
+        body_color: Tuple[int, int] | None = None,
+    ) -> None:
         """Инициализирует объект с позицией и цветом."""
         self.position = position or CENTER_POSITION
         self.body_color = body_color
@@ -36,19 +40,24 @@ class GameObject:
         """Абстрактный метод отрисовки. Переопределяется в дочерних классах."""
         pass
 
-    def draw_cell(self, surface: pygame.Surface, position: Tuple[int, int], color: Tuple[int, int]) -> None:
+    def draw_cell(
+        self,
+        surface: pygame.Surface,
+        position: Tuple[int, int],
+        color: Tuple[int, int],
+    ) -> None:
         """Отрисовывает одну ячейку по заданным координатам и цвету."""
         rect = pygame.Rect(position[0], position[1], GRID_SIZE, GRID_SIZE)
         pygame.draw.rect(surface, color, rect)
 
 
 class Apple(GameObject):
-    """Класс яблока."""
+    """Класс, представляющий яблоко."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Инициализирует яблоко красного цвета в случайной позиции."""
         super().__init__(body_color=APPLE_COLOR)
-        self.randomize_position([])  # изначально змейка пуста
+        self.randomize_position([])
 
     def randomize_position(self, snake_positions: List[Tuple[int, int]]) -> None:
         """Генерирует случайную позицию, не совпадающую с позициями змейки."""
@@ -65,16 +74,16 @@ class Apple(GameObject):
 
 
 class Snake(GameObject):
-    """Класс змейки."""
+    """Класс, представляющий змейку."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Инициализирует змейку в начальном состоянии."""
         super().__init__(body_color=SNAKE_COLOR)
         self.length = 1
         self.positions: List[Tuple[int, int]] = [self.position]
         self.direction = RIGHT
-        self.next_direction = None
-        self.last = None
+        self.next_direction: Tuple[int, int] | None = None
+        self.last: Tuple[int, int] | None = None
 
     def get_head_position(self) -> Tuple[int, int]:
         """Возвращает позицию головы змейки."""
@@ -92,15 +101,17 @@ class Snake(GameObject):
         dx, dy = self.direction
         new_head = (
             (head_x + dx * GRID_SIZE) % SCREEN_WIDTH,
-            (head_y + dy * GRID_SIZE) % SCREEN_HEIGHT
+            (head_y + dy * GRID_SIZE) % SCREEN_HEIGHT,
         )
 
-        # Проверка самоукуса (невозможно для короткой змейки)
+        # Самоукус невозможен для короткой змейки
         if len(self.positions) > 3 and new_head in self.positions[2:]:
             self.reset()
             return
 
-        self.last = self.positions[-1] if len(self.positions) >= self.length else None
+        self.last = (
+            self.positions[-1] if len(self.positions) >= self.length else None
+        )
         self.positions.insert(0, new_head)
 
         if new_head == apple.position:
@@ -116,8 +127,9 @@ class Snake(GameObject):
 
         for position in self.positions:
             self.draw_cell(surface, position, self.body_color)
-            # Обводка для красоты
-            border_rect = pygame.Rect(position[0], position[1], GRID_SIZE, GRID_SIZE)
+            border_rect = pygame.Rect(
+                position[0], position[1], GRID_SIZE, GRID_SIZE
+            )
             pygame.draw.rect(surface, (93, 216, 93), border_rect, 1)
 
     def reset(self) -> None:
@@ -130,7 +142,7 @@ class Snake(GameObject):
 
 
 def handle_keys(snake: Snake) -> None:
-    """Обрабатывает нажатия клавиш."""
+    """Обрабатывает нажатия клавиш для управления змейкой и выхода."""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -154,7 +166,7 @@ def main() -> None:
     pygame.init()
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption('Изгиб Питона')
+    pygame.display.set_caption("Изгиб Питона")
 
     apple = Apple()
     snake = Snake()
@@ -172,5 +184,5 @@ def main() -> None:
         clock.tick(10)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
